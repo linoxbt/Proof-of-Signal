@@ -1,12 +1,13 @@
 # Edge Functions (Deno, TypeScript)
 
-Not written yet. The schema they write to is in `../migrations`. Planned, one per v1 endpoint the app calls:
-
-| Function | Endpoint | Does |
+| Function | Serves | Notes |
 | --- | --- | --- |
-| `devices` | `POST /v1/devices`, `DELETE /v1/devices/{id}/data` | Verify the Play Integrity token, store the ES256 public key; erasure calls `erase_device_data()` |
-| `nonce` | `GET /v1/nonce` | Insert into `nonces` (5-minute expiry) |
-| `pus-nearby` | `GET /v1/pus/nearby` | PostGIS nearest units with test counts |
-| `tests` | `POST /v1/tests` | Verify signature over canonical JSON, `consume_nonce()`, place/radio/ASN checks, trust weight, insert `tests` + `test_sims` + `test_cells` |
+| [`api`](api/README.md) | Every `/v1/*` endpoint in `contracts/api.md` except the probe and the watcher control endpoints | Device endpoints, public reads, reviewer endpoints |
 
-All run with the service role. The tables they write have RLS on and no anon or authenticated policies.
+The function connects to Postgres directly with `SUPABASE_DB_URL` (`npm:postgres`).
+
+- Device endpoints and public reads run as the connection role, which bypasses RLS. The tables they write (`devices`, `nonces`, `tests`, `test_sims`, `test_cells`, `pu_location_votes`) have RLS on and no anon or authenticated policies.
+- Public night endpoints run as `anon`, so they read only `public_unit_status` and other public tables.
+- Reviewer endpoints verify the Supabase access token (HS256) and run as `authenticated` with the JWT claims set, so RLS and `has_role()` decide access.
+
+Deploy with `supabase functions deploy api --no-verify-jwt`, because devices carry no Supabase JWT. Environment variables and tests are documented in [`api/README.md`](api/README.md).

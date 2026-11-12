@@ -8,3 +8,8 @@ major_version = 17
 [db.seed]
 enabled = true
 sql_paths = ["./seed.sql"]
+
+# Devices authenticate with their own signing key, not a Supabase JWT, and the
+# function verifies reviewer JWTs itself (contracts/api.md, "Auth").
+[functions.api]
+verify_jwt = false
