@@ -1,16 +1,10 @@
 // JSON Schema validation of the POST /v1/tests payload, plus the rules the
-// schema cannot express. schema/test-payload.schema.json is a copy of
-// contracts/test-payload.schema.json (a unit test keeps them identical).
+// schema cannot express. The validator is an Ajv standalone module generated
+// at build time (`deno task gen-schema`) from schema/test-payload.schema.json,
+// a copy of contracts/test-payload.schema.json; unit tests fail if either is
+// stale. No code is compiled at runtime.
 
-import Ajv2020 from "ajv2020";
-import addFormats from "ajv-formats";
-import schema from "../schema/test-payload.schema.json" with { type: "json" };
-
-// deno-lint-ignore no-explicit-any
-const ajv = new (Ajv2020 as any)({ allErrors: false, strict: true, allowUnionTypes: true });
-// deno-lint-ignore no-explicit-any
-(addFormats as any)(ajv, ["uuid", "date-time"]);
-const validate = ajv.compile(schema);
+import validate from "./validate_payload.generated.js";
 
 export interface Cell {
   reg: boolean;

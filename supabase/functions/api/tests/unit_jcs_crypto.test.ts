@@ -56,10 +56,11 @@ Deno.test("JCS: nested objects, arrays, no whitespace, undefined members dropped
 
 Deno.test("DER <-> raw: roundtrip and WebCrypto verification over many signatures", async () => {
   const key = await newKey();
-  const data = new TextEncoder().encode("proof of signal");
   let sawPadded = false;
   let sawShort = false;
   for (let i = 0; i < 200; i++) {
+    // Deno's ECDSA is deterministic (RFC 6979): vary the message to vary r and s.
+    const data = new TextEncoder().encode(`proof of signal ${i}`);
     const sigB64 = await signDer(key, data);
     const der = b64decode(sigB64);
     // r or s with the high bit set needs a 0x00 pad byte (33-byte INTEGER).

@@ -10,8 +10,8 @@ import postgres from "postgres";
 import { createApp } from "../app.ts";
 import { loadConfig } from "../lib/config.ts";
 import { canonicalBytes } from "../lib/jcs.ts";
-import { b64decode, b64encode, derToRaw, rawToDer } from "../lib/crypto.ts";
-import { signHs256 } from "../lib/jwt.ts";
+import { b64decode, b64encode, b64url, derToRaw, rawToDer } from "../lib/crypto.ts";
+import { AccessTokenVerifier, signHs256 } from "../lib/jwt.ts";
 import { OffIntegrityVerifier } from "../lib/integrity.ts";
 import {
   eveningTs,
@@ -691,6 +691,43 @@ Deno.test({
       assertEquals(filtered.body.flags.map((f: { id: string }) => f.id), [flagD]);
       const badq = await call("GET", `${path}?class=NOPE`, undefined, auth);
       assertEquals(badq.body.error.code, "invalid_query");
+    });
+
+    await t.step("reviewer flags with an asymmetric (ES256) token verified against a JWKS", async () => {
+      const kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+      const pub = { ...(await crypto.subtle.exportKey("jwk", kp.publicKey)), kid: "k1", alg: "ES256", use: "sig" };
+      const base = "https://proj.supabase.test";
+      const tokens = new AccessTokenVerifier({
+        supabaseUrl: base,
+        fetchFn: (() => Promise.resolve(Response.json({ keys: [pub] }))) as typeof fetch,
+      });
+      const jwksApp = createApp(cfg, new FixtureIntegrity(), tokens);
+      const enc = new TextEncoder();
+      const h = b64url(enc.encode(JSON.stringify({ alg: "ES256", typ: "JWT", kid: "k1" })));
+      const b = b64url(enc.encode(JSON.stringify({
+        sub: REVIEWER1,
+        role: "authenticated",
+        aud: "authenticated",
+        iss: `${base}/auth/v1`,
+        exp: Math.floor(Date.now() / 1000) + 600,
+      })));
+      const sig = new Uint8Array(
+        await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, kp.privateKey, enc.encode(`${h}.${b}`)),
+      );
+      const res = await jwksApp.handler(
+        new Request(`http://localhost/functions/v1/api/v1/night/${electionId}/flags`, {
+          headers: { authorization: `Bearer ${h}.${b}.${b64url(sig)}` },
+        }),
+      );
+      assertEquals(res.status, 200);
+      assertEquals((await res.json()).flags.length, 2);
+      const hs = await jwksApp.handler(
+        new Request(`http://localhost/functions/v1/api/v1/night/${electionId}/flags`, {
+          headers: { authorization: `Bearer ${await jwt(REVIEWER1)}` },
+        }),
+      );
+      assertEquals(hs.status, 401); // no HS256 secret configured on this app
+      await jwksApp.close();
     });
 
     await t.step("reviewer review flow: two-person rule, duplicates, forbidden", async () => {

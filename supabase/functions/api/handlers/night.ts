@@ -4,7 +4,7 @@
 import { ApiError, CACHE_NIGHT, CACHE_PRIVATE, err, isObject, json, readJson } from "../lib/http.ts";
 import { type Ctx, intParam, type Req, UUID_RE } from "../lib/context.ts";
 import { asAnon, asUser, pgCode, type Tx } from "../lib/db.ts";
-import { type JwtClaims, verifyHs256 } from "../lib/jwt.ts";
+import type { JwtClaims } from "../lib/jwt.ts";
 
 // deno-lint-ignore no-explicit-any
 type Row = any;
@@ -114,11 +114,11 @@ export async function authenticate(ctx: Ctx, req: Request): Promise<JwtClaims> {
   const h = req.headers.get("authorization") ?? "";
   const m = /^Bearer\s+(\S+)$/i.exec(h);
   if (!m) throw err.unauthenticated();
-  if (!ctx.cfg.jwtSecret) {
-    console.error("SUPABASE_JWT_SECRET is not set: reviewer endpoints cannot verify tokens");
+  if (!ctx.tokens.configured) {
+    console.error("Neither SUPABASE_URL (JWKS) nor SUPABASE_JWT_SECRET is set: reviewer tokens cannot be verified");
     throw err.unauthenticated("Token verification is not configured");
   }
-  const claims = await verifyHs256(m[1], ctx.cfg.jwtSecret);
+  const claims = await ctx.tokens.verify(m[1]);
   if (!claims) throw err.unauthenticated("Invalid or expired token");
   return claims;
 }

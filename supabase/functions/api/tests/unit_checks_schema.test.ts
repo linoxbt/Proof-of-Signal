@@ -2,6 +2,7 @@ import { assert, assertAlmostEquals, assertEquals } from "@std/assert";
 import { type CheckInput, impliedSpeedKmh, placeScore, runChecks, taMismatch, trust } from "../lib/checks.ts";
 import { dbRadio, validatePayload } from "../lib/schema.ts";
 import { sim } from "./helpers.ts";
+import { generate, OUTPUT } from "../scripts/gen_schema.ts";
 
 const NOW = Date.parse("2026-12-02T19:00:00Z");
 const base: CheckInput = {
@@ -117,6 +118,10 @@ Deno.test("schema: bundled copy equals contracts/test-payload.schema.json", asyn
   const here = new URL("../schema/test-payload.schema.json", import.meta.url);
   const contract = new URL("../../../../contracts/test-payload.schema.json", import.meta.url);
   assertEquals(JSON.parse(await Deno.readTextFile(here)), JSON.parse(await Deno.readTextFile(contract)));
+});
+
+Deno.test("schema: generated standalone validator is up to date (run `deno task gen-schema`)", async () => {
+  assertEquals(await Deno.readTextFile(OUTPUT), await generate());
 });
 
 Deno.test("schema: valid payloads pass, violations are reported", () => {

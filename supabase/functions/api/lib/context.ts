@@ -2,6 +2,7 @@ import type { Config } from "./config.ts";
 import type { Sql } from "./db.ts";
 import type { IntegrityVerifier } from "./integrity.ts";
 import { RateLimiter } from "./ratelimit.ts";
+import type { AccessTokenVerifier } from "./jwt.ts";
 import { err } from "./http.ts";
 
 export interface Ctx {
@@ -9,6 +10,7 @@ export interface Ctx {
   sql: Sql;
   integrity: IntegrityVerifier;
   limiter: RateLimiter;
+  tokens: AccessTokenVerifier;
 }
 
 export interface Req {

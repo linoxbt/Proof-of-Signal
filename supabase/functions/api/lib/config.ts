@@ -5,6 +5,8 @@ export type IntegrityMode = "google" | "off";
 export interface Config {
   databaseUrl: string;
   jwtSecret: string | null;
+  supabaseUrl: string | null;
+  jwtIssuer: string | null;
   dashboardOrigin: string;
   integrityMode: IntegrityMode;
   allowUnverifiedDevices: boolean;
@@ -40,6 +42,8 @@ export function loadConfig(env: Env = Deno.env): Config {
   const cfg: Config = {
     databaseUrl,
     jwtSecret: env.get("SUPABASE_JWT_SECRET") || null,
+    supabaseUrl: env.get("SUPABASE_URL") || null,
+    jwtIssuer: env.get("SUPABASE_JWT_ISSUER") || null,
     dashboardOrigin: env.get("DASHBOARD_ORIGIN") || "",
     integrityMode: mode,
     allowUnverifiedDevices: env.get("ALLOW_UNVERIFIED_DEVICES") === "true",
