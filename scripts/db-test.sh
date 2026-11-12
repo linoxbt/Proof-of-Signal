@@ -27,7 +27,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-"${RUN[@]}" "$PG_BIN/initdb" -D "$WORK/data" -U postgres -A trust --no-sync >/dev/null
+"${RUN[@]}" "$PG_BIN/initdb" -D "$WORK/data" -U postgres -A trust -E UTF8 --locale=C.UTF-8 --no-sync >/dev/null
 "${RUN[@]}" "$PG_BIN/pg_ctl" -D "$WORK/data" -l "$WORK/pg.log" -w \
   -o "-p $PORT -k $WORK -c listen_addresses='' -c fsync=off -c TimeZone=UTC" start >/dev/null
 

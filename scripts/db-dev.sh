@@ -39,7 +39,7 @@ case "${1:-start}" in
       mkdir -p "$BASE"
       [ "$(id -u)" = "0" ] && chown postgres "$BASE"
       if [ ! -f "$BASE/data/PG_VERSION" ]; then
-        "${RUN[@]}" "$PG_BIN/initdb" -D "$BASE/data" -U postgres -A trust --no-sync >/dev/null
+        "${RUN[@]}" "$PG_BIN/initdb" -D "$BASE/data" -U postgres -A trust -E UTF8 --locale=C.UTF-8 --no-sync >/dev/null
       fi
       "${RUN[@]}" "$PG_BIN/pg_ctl" -D "$BASE/data" -l "$BASE/pg.log" -w \
         -o "-p $PORT -c listen_addresses=127.0.0.1 -k $BASE -c TimeZone=UTC" start >/dev/null
