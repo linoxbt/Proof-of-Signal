@@ -1,0 +1,51 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "env": {
+        "API_BASE": "http://10.0.2.2:54321/functions/v1/api",
+        "PROBE_BASE": "http://10.0.2.2:8080",
+        "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER": ""
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease",
+        "applicationArchivePath": "android/app/build/outputs/apk/release/*.apk"
+      },
+      "env": {
+        "API_BASE": "https://api.staging.example.org",
+        "PROBE_BASE": "https://probe.staging.example.org",
+        "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER": ""
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "API_BASE": "https://api.example.org",
+        "PROBE_BASE": "https://probe.example.org"
+      },
+      "environment": "production"
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "internal"
+      }
+    }
+  }
+}

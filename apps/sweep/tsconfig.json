@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": true,
+    "allowImportingTsExtensions": true,
+    "types": ["jest", "node"]
+  },
+  "include": ["App.tsx", "index.ts", "app.config.ts", "src", "modules/pos-radio/index.ts", "__tests__"]
+}

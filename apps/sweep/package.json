@@ -1,0 +1,50 @@
+{
+  "name": "proof-of-signal-sweep",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@react-native-community/netinfo": "12.0.1",
+    "expo": "~58.0.24",
+    "expo-build-properties": "~58.0.12",
+    "expo-constants": "~58.0.16",
+    "expo-dev-client": "~58.0.19",
+    "expo-localization": "~58.0.5",
+    "expo-location": "~58.0.21",
+    "expo-speech": "~58.0.4",
+    "expo-sqlite": "~58.0.16",
+    "expo-status-bar": "~58.0.5",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.11.1",
+    "react-native-svg": "15.16.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "~19.3.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "jest": "^30.5.2",
+    "jest-expo": "^58.0.14",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "prebuild:android": "expo prebuild --platform android --clean --no-install",
+    "export": "expo export --platform android",
+    "doctor": "expo-doctor"
+  },
+  "private": true,
+  "jest": {
+    "preset": "jest-expo/android",
+    "testMatch": [
+      "<rootDir>/__tests__/**/*.test.ts"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/android/"
+    ]
+  }
+}
