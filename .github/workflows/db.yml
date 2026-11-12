@@ -1,0 +1,19 @@
+name: database
+
+on:
+  push:
+    paths: ["supabase/**", "scripts/db-test.sh", ".github/workflows/db.yml"]
+  pull_request:
+    paths: ["supabase/**", "scripts/db-test.sh", ".github/workflows/db.yml"]
+
+jobs:
+  migrations:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL 16 and PostGIS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16 postgresql-16-postgis-3
+      - name: Apply migrations and run tests
+        run: sudo scripts/db-test.sh

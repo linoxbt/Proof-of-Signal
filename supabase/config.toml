@@ -1,0 +1,10 @@
+# Supabase CLI project config. `supabase start` runs the stack locally;
+# `supabase db push` applies supabase/migrations to the linked project.
+project_id = "proof-of-signal"
+
+[db]
+major_version = 17
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]

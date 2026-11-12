@@ -1,0 +1,23 @@
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+.expo/
+*.apk
+*.aab
+__pycache__/
+*.pyc
+.venv/
+.env
+.env.*
+!.env.example
+supabase/.branches
+supabase/.temp
+# Downloaded datasets never go in git (see data/README.md)
+data/raw/
+data/cache/
+*.parquet
+*.tif
+*.csv.gz
+.DS_Store

@@ -1,0 +1,8 @@
+{
+  "name": "proof-of-signal",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "db:test": "scripts/db-test.sh"
+  }
+}
