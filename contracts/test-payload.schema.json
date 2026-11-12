@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proof-of-signal/contracts/test-payload.schema.json",
+  "title": "POST /v1/tests payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "device_id", "nonce", "pu_code", "ts", "fix", "sims", "app", "integrity", "sig"],
+  "properties": {
+    "v": { "const": 1 },
+    "device_id": { "type": "string", "format": "uuid" },
+    "nonce": { "type": ["string", "null"], "pattern": "^n_[A-Za-z0-9_-]{22}$" },
+    "pu_code": { "type": "string", "pattern": "^\\d{2}-\\d{2}-\\d{2}-\\d{3}$" },
+    "ts": { "type": "string", "format": "date-time" },
+    "fix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lat", "lng", "acc_m", "mock"],
+      "properties": {
+        "lat": { "type": "number", "minimum": 3.0, "maximum": 14.5 },
+        "lng": { "type": "number", "minimum": 2.5, "maximum": 15.0 },
+        "acc_m": { "type": "number", "exclusiveMinimum": 0, "maximum": 5000 },
+        "mock": { "type": "boolean" }
+      }
+    },
+    "sims": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slot", "mcc_mnc", "net_type", "cells", "latency_ms", "upload"],
+        "properties": {
+          "slot": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "mcc_mnc": { "type": "string", "pattern": "^\\d{3}-\\d{2,3}$" },
+          "net_type": { "type": ["string", "null"], "maxLength": 16 },
+          "latency_ms": {
+            "type": "array",
+            "maxItems": 5,
+            "items": { "type": ["integer", "null"], "minimum": 0, "maximum": 120000 }
+          },
+          "cells": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["reg", "radio", "sample"],
+              "properties": {
+                "reg": { "type": "boolean" },
+                "radio": { "enum": ["GSM", "WCDMA", "UMTS", "LTE", "NR", "CDMA"] },
+                "sample": { "type": "integer", "minimum": 0, "maximum": 9 },
+                "mcc": { "type": ["integer", "null"], "minimum": 0, "maximum": 999 },
+                "mnc": { "type": ["integer", "null"], "minimum": 0, "maximum": 999 },
+                "area": { "type": ["integer", "null"], "minimum": 0 },
+                "cid": { "type": ["integer", "null"], "minimum": 0 },
+                "pci": { "type": ["integer", "null"], "minimum": 0, "maximum": 1007 },
+                "earfcn": { "type": ["integer", "null"], "minimum": 0 },
+                "rsrp": { "type": ["integer", "null"], "minimum": -156, "maximum": -31 },
+                "rsrq": { "type": ["integer", "null"], "minimum": -43, "maximum": 20 },
+                "rssnr": { "type": ["integer", "null"], "minimum": -23, "maximum": 40 },
+                "rssi": { "type": ["integer", "null"], "minimum": -140, "maximum": 0 },
+                "ta": { "type": ["integer", "null"], "minimum": 0, "maximum": 1282 },
+                "level": { "type": ["integer", "null"], "minimum": 0, "maximum": 4 }
+              }
+            }
+          },
+          "upload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["ok", "bytes", "dns_ms", "connect_ms", "tls_ms", "ttfb_ms", "total_ms", "http_status", "err"],
+            "properties": {
+              "ok": { "type": "boolean" },
+              "bytes": { "type": "integer", "minimum": 0, "maximum": 2097152 },
+              "dns_ms": { "type": ["integer", "null"], "minimum": 0 },
+              "connect_ms": { "type": ["integer", "null"], "minimum": 0 },
+              "tls_ms": { "type": ["integer", "null"], "minimum": 0 },
+              "ttfb_ms": { "type": ["integer", "null"], "minimum": 0 },
+              "total_ms": { "type": ["integer", "null"], "minimum": 0, "maximum": 600000 },
+              "http_status": { "type": ["integer", "null"], "minimum": 100, "maximum": 599 },
+              "err": { "type": ["string", "null"], "maxLength": 64 }
+            }
+          }
+        }
+      }
+    },
+    "app": { "type": "string", "maxLength": 32 },
+    "integrity": { "type": "string", "maxLength": 8192 },
+    "sig": { "type": "string", "maxLength": 512 }
+  }
+}

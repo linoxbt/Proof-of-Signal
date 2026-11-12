@@ -14,11 +14,14 @@ create table auth.users (
   email  text
 );
 
--- Supabase reads the JWT subject from request.jwt.claim(s); tests set it with
--- set_config('request.jwt.claim.sub', ...).
+-- Same shape as Supabase's auth.uid(): the legacy per-claim setting, else the
+-- `sub` of request.jwt.claims.
 create function auth.uid() returns uuid
 language sql stable as $$
-  select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid;
+  select coalesce(
+    nullif(current_setting('request.jwt.claim.sub', true), ''),
+    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')
+  )::uuid;
 $$;
 
 grant usage on schema public to anon, authenticated, service_role;

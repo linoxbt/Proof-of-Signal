@@ -5,6 +5,7 @@
 #
 #   scripts/db-test.sh            # PG_BIN defaults to /usr/lib/postgresql/16/bin
 #   PG_BIN=/path/to/bin scripts/db-test.sh
+#   PGTEST_PORT=54340 DB_TESTS='40_*' scripts/db-test.sh   # other port, subset of tests
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -45,5 +46,5 @@ for f in "$ROOT"/supabase/migrations/*.sql; do run "$f"; done
 echo "seed"
 run "$ROOT/supabase/seed.sql"
 echo "tests"
-for f in "$ROOT"/supabase/tests/[1-9]*.sql; do run "$f"; done
+for f in "$ROOT"/supabase/tests/${DB_TESTS:-[1-9]*}.sql; do run "$f"; done
 echo "all database tests passed"
