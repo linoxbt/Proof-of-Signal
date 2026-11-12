@@ -1,0 +1,69 @@
+name: services
+
+on:
+  push:
+    paths: ["supabase/**", "services/**", "contracts/**", "scripts/**", ".github/workflows/services.yml"]
+  pull_request:
+    paths: ["supabase/**", "services/**", "contracts/**", "scripts/**", ".github/workflows/services.yml"]
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.24" }
+      - name: Install PostgreSQL 16 and PostGIS
+        run: sudo apt-get update && sudo apt-get install -y postgresql-16 postgresql-16-postgis-3
+      - name: Test
+        run: |
+          sudo PGDEV_PORT=54334 scripts/db-dev.sh start
+          cd services/probe
+          go vet ./...
+          PROBE_TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:54334/pos_dev go test -count=1 ./...
+
+  api:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with: { deno-version: v2.x }
+      - name: Install PostgreSQL 16 and PostGIS
+        run: sudo apt-get update && sudo apt-get install -y postgresql-16 postgresql-16-postgis-3
+      - name: Check, lint, test
+        run: |
+          sudo PGDEV_PORT=54331 scripts/db-dev.sh start
+          cd supabase/functions/api
+          deno task check
+          deno task lint
+          DATABASE_URL=postgresql://postgres@127.0.0.1:54331/pos_dev deno task test
+
+  model:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install PostgreSQL 16 and PostGIS
+        run: sudo apt-get update && sudo apt-get install -y postgresql-16 postgresql-16-postgis-3
+      - name: Test
+        run: |
+          sudo PGDEV_PORT=54332 scripts/db-dev.sh start
+          cd services/model
+          pip install -e '.[data,dev]'
+          POS_MODEL_TEST_DB_URL=postgresql://postgres@127.0.0.1:54332/pos_dev pytest -q
+
+  watcher:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install PostgreSQL 16 and PostGIS
+        run: sudo apt-get update && sudo apt-get install -y postgresql-16 postgresql-16-postgis-3
+      - name: Test
+        run: |
+          sudo PGDEV_PORT=54333 scripts/db-dev.sh start
+          cd services/watcher
+          pip install -e '.[dev]'
+          DATABASE_URL=postgresql://postgres@127.0.0.1:54333/pos_dev pytest -q
