@@ -1,0 +1,12 @@
+{
+  "_comment": "Fixture in a format WE defined for the isolated parser. It is NOT the real IReV response shape, which is unverified.",
+  "ward": "Synthetic Ward 99-01-01",
+  "polling_units": [
+    {"pu_code": "99-01-01-001", "status": "pending", "documents": []},
+    {"pu_code": "99/1/1/2", "status": "", "documents": [{"id": "doc-1", "uploaded_at": "2026-12-12T15:40:00Z", "url": "https://example.invalid/sheet.jpg", "figures": {"never": "read"}}]},
+    {"pu_code": "99-01-01-003", "status": "uploaded"},
+    {"pu_code": "99-01-01-004", "status": "cancelled"},
+    {"pu_code": "not-a-code", "status": "uploaded"},
+    "garbage"
+  ]
+}

@@ -217,11 +217,11 @@ Per election, from `elections.config` as frozen in `snapshots.config`:
 - `N = (1 − p) · r^m`, `O = p · q`, `D = p · (1 − q) · S(t)` with `q = prior_other_q` (0.05), `r = neighbour_factor_r` (0.3).
 - `p_network = N/(N+O+D)`, `p_other = O/(N+O+D)`, `p_delay = D/(N+O+D)`.
 
-System stall (re-evaluated each tick, every 2 minutes):
-1. Strong-stratum upload rate over the last `stall_window_min` (20) minutes < `stall_rate_frac` (0.1) × its rate over the 30 minutes before that window;
-2. pending share > `stall_pending_frac` (0.05);
-3. `|strong_ratio − weak_ratio| < stall_ratio_diff` (0.2), where ratio = recent rate / trailing rate per stratum (a stratum with trailing rate 0 has ratio 1 if its recent rate is 0, else treat as not stalled).
-All three → open a `stall_events` row; it closes when condition 1 stops holding.
+System stall (re-evaluated each tick, every 2 minutes). Rates are uploads per minute per stratum; "recent" = the last `stall_window_min` (20) minutes, "trailing" = the 30 minutes before that.
+1. Strong-stratum recent rate < `stall_rate_frac` (0.1) × strong trailing rate, counted only when the trailing rate predicts at least `stall_min_expected` (10) strong uploads in the recent window;
+2. the overall pending share **and** the strong-stratum pending share both exceed `stall_pending_frac` (0.05), so the natural end-of-night tail never opens a stall;
+3. `|strong_ratio − weak_ratio| < stall_ratio_diff` (0.2), where ratio = recent rate / trailing rate per stratum (a stratum with trailing rate 0 has ratio 1 if its recent rate is 0, else it is not stalled).
+All three → open a `stall_events` row, recording the strong trailing rate as `evidence.baseline_strong_rate`. An open stall is judged against that baseline, not the moving trailing window (which empties during a long freeze): it closes when the strong recent rate climbs back to `stall_rate_frac` × baseline or more, or when the strong-stratum pending share falls to `stall_pending_frac` or below.
 
 Classes (pending units only, `t ≥ 0`, checked in order):
 1. `HELD_SYSTEM_STALL` while a stall is open.
